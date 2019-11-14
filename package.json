@@ -1,6 +1,9 @@
 {
   "name": "ng1-template-updater",
   "version": "0.0.0",
+  "engines": {
+    "node": "10.x"
+  },
   "author": "Hsuan Lee",
   "homepage": "https://github.com/hsuanxyz/ng1-template-updater",
   "scripts": {

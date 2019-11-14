@@ -18,6 +18,7 @@ export class AppComponent implements AfterViewInit {
   editor: IStandaloneCodeEditor;
   value = TEMPLATE;
   canFix = false;
+  decorations: string[] = [];
 
   ngAfterViewInit(): void {
     this.editor = editor.create(this.container.nativeElement, {
@@ -62,7 +63,7 @@ export class AppComponent implements AfterViewInit {
     const failures = templateAdapter.failureMessages();
     this.failures = [...failures];
     this.canFix = failures.some(f => f.level === LogLevel.Info);
-    this.editor.deltaDecorations([], failures.map(failure => {
+    this.decorations = this.editor.deltaDecorations(this.decorations, failures.map(failure => {
       return {
         range: new Range(
           failure.pos.line + 1, failure.pos.character + 1,

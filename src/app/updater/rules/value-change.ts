@@ -112,7 +112,9 @@ export const valueChangeRules = {
       });
     });
     return {
-      value: failures.length === 0 ? `let ${valueIdentifier} of ${rhs}` : expression,
+      value: failures.every(f => f.level !== LogLevel.Error)
+        ? `let ${valueIdentifier} of ${rhs}`
+        : expression,
       failures
     };
   }

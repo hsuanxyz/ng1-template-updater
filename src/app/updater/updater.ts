@@ -76,7 +76,7 @@ export class TemplateAdapter {
     const failures: Failure[] = [];
     if (changeRuleFun) {
       const start = location.endOffset - 1 - attr.value.length;
-      const data = changeRuleFun(attr.value, location, this.failures);
+      const data = changeRuleFun(attr.value, location);
       this.updateBuffer.remove(start, attr.value.length);
       this.updateBuffer.insertLeft(start, data.value);
       failures.push(...data.failures);
@@ -88,7 +88,7 @@ export class TemplateAdapter {
           this.updateBuffer.remove(location.startOffset, attr.name.length);
           this.updateBuffer.insertLeft(location.startOffset, rule.replaceWith);
           failures.push({
-            message: `Migrate property ${attr.name} to ${rule.replaceWith}`,
+            message: `Update property ${attr.name} to ${rule.replaceWith}`,
             position: location.startOffset,
             level: LogLevel.Info,
             length: attr.name.length
@@ -130,7 +130,7 @@ export class TemplateAdapter {
           this.updateBuffer.remove(start, length);
           this.updateBuffer.insertLeft(start, newPipe);
           this.failures.push({
-            message: `Migrate filter ${filter.map(f => f.text).join(':')} to pipe ${newPipe}`,
+            message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${newPipe}`,
             position: start,
             level: LogLevel.Info,
             length

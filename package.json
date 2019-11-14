@@ -1,10 +1,12 @@
 {
   "name": "ng1-template-updater",
   "version": "0.0.0",
+  "author": "Hsuan Lee",
+  "homepage": "https://github.com/hsuanxyz/ng1-template-updater",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "ng serve --extra-webpack-config webpack.partial.js",
+    "build": "ng build --extra-webpack-config webpack.partial.js",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -19,6 +21,10 @@
     "@angular/platform-browser": "~8.2.4",
     "@angular/platform-browser-dynamic": "~8.2.4",
     "@angular/router": "~8.2.4",
+    "monaco-editor": "^0.18.1",
+    "monaco-editor-webpack-plugin": "^1.7.0",
+    "ng-zorro-antd": "^8.5.0",
+    "ngx-build-plus": "^9.0.2",
     "parse5": "^5.1.1",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",

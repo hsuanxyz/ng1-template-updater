@@ -1,0 +1,98 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+nz-layout {
+  height: 100%;
+}
+
+nz-header {
+  background-color: #353535;
+  color: #fff;
+  display: flex;
+  padding: 0 20px;
+  .github {
+    font-size: 32px;
+    color: #fff;
+  }
+  h1 {
+    flex: 1 auto;
+    color: #fff;
+    i {
+      text-decoration-color: red;
+      text-decoration-line: line-through;
+      text-decoration-skip-ink: none;
+      text-decoration-style: inherit;
+      font-style: normal;
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+nz-sider, nz-content {
+  padding: 0 20px;
+  background-color: #353535;
+}
+
+nz-sider {
+  padding-left: 0;
+  position: relative;
+
+  .fix-btn {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    right: 30px;
+  }
+
+  .messages {
+    overflow: auto;
+    background-color: #1e1e1e;
+    height: 100%;
+
+    .message {
+      font-family: Consolas, Verdana;
+      background-color: #1d1e1c;
+      color: #eee;
+      padding: 8px 5px;
+      transition: background-color 0.3s;
+      line-height: 17px;
+      cursor: pointer;
+      font-size: 12px;
+      .position {
+        color: #5d5d5d;
+      }
+      i {
+        &.error {
+          color: red;
+        }
+        &.close {
+          color: #1f8ffb;
+        }
+      }
+      &:hover {
+        background-color: #353535;
+      }
+    }
+  }
+}
+
+
+::ng-deep {
+  .failure-glyph-margin {
+    background: #ff8438;
+  }
+  .decoration-link {
+    text-decoration-color: red;
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-skip-ink: none;
+  }
+
+  .warn-content {
+    //border: 1px solid rgba(173, 216, 230, 0.3);
+    background: rgba(182, 182, 182, .3);
+  }
+}

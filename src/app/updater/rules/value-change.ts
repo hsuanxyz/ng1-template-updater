@@ -14,7 +14,8 @@ export const valueChangeRules = {
       message: 'Update expression `ng-show="expression"` to `[hidden]="!(expression)"`',
       position: start,
       level: LogLevel.Info,
-      length: expression.length
+      length: expression.length,
+      url: 'https://angular.io/guide/ajs-quick-reference'
     });
     return {
       value: `!(${expression})`,
@@ -62,7 +63,8 @@ export const valueChangeRules = {
         message: 'Unsupported expression `track by` use `trackBy` instead',
         position: start,
         level: LogLevel.Error,
-        length: expression.length
+        length: expression.length,
+        url: 'https://angular.io/api/common/NgForOf#ngForTrackBy'
       });
     }
     if (keyIdentifier) {
@@ -70,7 +72,8 @@ export const valueChangeRules = {
         message: 'Unsupported expression `(key, value) in items`',
         position: start,
         level: LogLevel.Error,
-        length: expression.length
+        length: expression.length,
+        url: 'https://angular.io/api/common/NgForOf'
       });
     }
 
@@ -79,7 +82,8 @@ export const valueChangeRules = {
         message: 'Unsupported expression `item in items as named`',
         position: start,
         level: LogLevel.Error,
-        length: expression.length
+        length: expression.length,
+        url: 'https://angular.io/api/common/NgForOf'
       });
     }
 
@@ -87,7 +91,8 @@ export const valueChangeRules = {
       message: 'Update expression `item in items` to `let item of items`',
       position: start,
       level: LogLevel.Info,
-      length: expression.length
+      length: expression.length,
+      url: 'https://angular.io/api/common/NgForOf'
     });
 
     const lex = new Lexer(rhs).lex();
@@ -96,8 +101,15 @@ export const valueChangeRules = {
     filters.filter(f => f.length).forEach(filter => {
       const fun = pipeChangeRules[filter[0].text];
       if (fun) {
-        const newPipe = fun(filter);
-        rhs = `${rhs.slice(0, filter[0].index)}${newPipe}`;
+        const { value, url } = fun(filter);
+        rhs = `${rhs.slice(0, filter[0].index)}${value}`;
+        failures.push({
+          message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${value}`,
+          position: start,
+          level: LogLevel.Info,
+          length: expression.length,
+          url
+        });
       }
 
       pipeUnsupportedRules.forEach(pipe => {

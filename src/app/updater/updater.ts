@@ -41,7 +41,8 @@ export class TemplateAdapter {
           message: failure.message,
           pos,
           length: failure.length,
-          level: failure.level
+          level: failure.level,
+          url: failure.url
         };
       });
   }
@@ -91,7 +92,8 @@ export class TemplateAdapter {
             message: `Update property ${attr.name} to ${rule.replaceWith}`,
             position: location.startOffset,
             level: LogLevel.Info,
-            length: attr.name.length
+            length: attr.name.length,
+            url: rule.url
           });
         }
       });
@@ -125,15 +127,16 @@ export class TemplateAdapter {
       const start = location.startOffset + filter[0].index;
       const length = filter[filter.length - 1].index + filter[filter.length - 1].text.length - filter[0].index;
       if (fun) {
-        const newPipe = fun(filter);
-        if (newPipe !== filter.map(f => f.text).join(':')) {
+        const { value, url } = fun(filter);
+        if (value !== filter.map(f => f.text).join(':')) {
           this.updateBuffer.remove(start, length);
-          this.updateBuffer.insertLeft(start, newPipe);
+          this.updateBuffer.insertLeft(start, value);
           this.failures.push({
-            message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${newPipe}`,
+            message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${value}`,
             position: start,
             level: LogLevel.Info,
-            length
+            length,
+            url
           });
         }
       }

@@ -1,4 +1,4 @@
-export const pipeUnsupportedRules = [
+export const pipeUnsupportedRules: string[] = [
   'filter',
   'orderBy'
 ];

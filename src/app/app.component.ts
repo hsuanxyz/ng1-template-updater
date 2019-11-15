@@ -73,7 +73,7 @@ export class AppComponent implements AfterViewInit {
           inlineClassName: failure.level === LogLevel.Error ? 'decoration-link' : '',
           stickiness: 1,
           hoverMessage: {
-            value: failure.message
+            value: failure.message + (failure.url ? ` [more](${failure.url})` : '')
           }
         }
       };

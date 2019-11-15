@@ -1,4 +1,4 @@
-export const attrUnsupportedRules = [
+export const attrUnsupportedRules: string[] = [
   'ng-app',
   'ng-controller',
   'ng-copy',

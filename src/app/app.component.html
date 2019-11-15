@@ -28,6 +28,7 @@
             <i *ngIf="item.level === 2" nz-icon class="close" nzType="issues-close" nzTheme="outline"></i>
             <span class="position"> ({{(item.pos.line + 1) + ',' + (item.pos.character + 1)}})</span>
             {{item.message}}
+            <a *ngIf="item.url" [href]="item.url" target="_blank">more</a>
           </div>
         </div>
     </nz-sider>

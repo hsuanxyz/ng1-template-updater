@@ -19,10 +19,10 @@ export const pipeChangeRules: { [key: string]: PipeChangeRule } = {
     };
   },
   currency: (pipes: Token[]) => {
-    let value = '';
+    const originPipe = pipes.map(p => p.text).join(':');
+    let value = originPipe;
     const url = 'https://angular.io/api/common/CurrencyPipe';
 
-    const originPipe = pipes.map(p => p.text).join(':');
     if (pipes.length === 1) {
       value = `currency`;
     }
@@ -31,8 +31,9 @@ export const pipeChangeRules: { [key: string]: PipeChangeRule } = {
       const currencyCode = pipes[1] && pipes[1].text;
       if (CURRENCIES_EN.indexOf(currencyCode) !== -1) {
         value = originPipe;
+      } else {
+        value = `currency:'USD':${currencyCode}`;
       }
-      value = `currency:'USD':${currencyCode}`;
     }
 
     if (pipes.length === 3) {

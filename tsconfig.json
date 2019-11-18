@@ -17,7 +17,15 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ng1-template-updater": [
+        "projects/ng1-template-updater/src"
+      ],
+      "ng1-template-updater/*": [
+        "projects/ng1-template-updater/src/*"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

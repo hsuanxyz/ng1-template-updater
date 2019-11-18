@@ -14,11 +14,13 @@ import {FilterParse} from './utils/filter-parse';
 
 import {Message, MessageDetail, LogLevel, AttrReplaceRule, AttrValueChangeRules, PipeChangeRules, TemplateUpdaterRules} from './interfaces';
 
-import {attrReplaceRules as defaultAttrReplaceRules} from './rules/attr-replace';
-import {attrUnsupportedRules as defaultAttrUnsupportedRules } from './rules/attr-unsupported';
-import {attrValueChangeRules as defaultAttrValueChangeRules} from './rules/attr-value-change';
-import {pipeChangeRules as defaultPipeChangeRules} from './rules/pipe-change';
-import {pipeUnsupportedRules as defaultPipeUnsupportedRules} from './rules/pipe-unsupported';
+import {
+  attrReplaceRules as defaultAttrReplaceRules,
+  attrUnsupportedRules as defaultAttrUnsupportedRules,
+  attrValueChangeRules as defaultAttrValueChangeRules,
+  pipeChangeRules as defaultPipeChangeRules,
+  pipeUnsupportedRules as defaultPipeUnsupportedRules
+} from './rules';
 
 export const defaultTemplateUpdaterRules: TemplateUpdaterRules = {
   attrReplaceRules: defaultAttrReplaceRules,

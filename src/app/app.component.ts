@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {editor, Range} from 'monaco-editor';
-import {MessageDetail, LogLevel, TemplateUpdater} from './updater';
+import {MessageDetail, LogLevel, TemplateUpdater} from 'ng1-template-updater';
 import {TEMPLATE} from './temptale';
 import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
 

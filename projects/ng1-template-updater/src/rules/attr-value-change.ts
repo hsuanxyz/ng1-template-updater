@@ -3,9 +3,7 @@ import {Lexer} from '../utils/lexer';
 import {FilterParse} from '../utils/filter-parse';
 import {pipeChangeRules} from './pipe-change';
 import {pipeUnsupportedRules} from './pipe-unsupported';
-import {Message} from '../interfaces/message';
-import {LogLevel} from '../interfaces/log-level';
-import {AttrValueChangeRules} from '../interfaces';
+import {AttrValueChangeRules, Message, LogLevel} from '../interfaces';
 
 export const attrValueChangeRules: AttrValueChangeRules = {
   'ng-show': (expression: string, location?: Location) => {

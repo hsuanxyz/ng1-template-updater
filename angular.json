@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ng1-template-updater": {
+    "ng1-template-updater-web": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
-            "outputPath": "dist/ng1-template-updater",
+            "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -55,37 +55,25 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
-                  "maximumError": "10kb"
-                }
-              ]
+              "buildOptimizer": true
             }
           }
         },
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "options": {
-            "browserTarget": "ng1-template-updater:build"
+            "browserTarget": "ng1-template-updater-web:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ng1-template-updater:build:production"
+              "browserTarget": "ng1-template-updater-web:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ng1-template-updater:build"
+            "browserTarget": "ng1-template-updater-web:build"
           }
         },
         "test": {
@@ -123,16 +111,52 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "ng1-template-updater:serve"
+            "devServerTarget": "ng1-template-updater-web:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "ng1-template-updater:serve:production"
+              "devServerTarget": "ng1-template-updater-web:serve:production"
             }
+          }
+        }
+      }
+    },
+    "ng1-template-updater": {
+      "projectType": "library",
+      "root": "projects/ng1-template-updater",
+      "sourceRoot": "projects/ng1-template-updater/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ng1-template-updater/tsconfig.lib.json",
+            "project": "projects/ng1-template-updater/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ng1-template-updater/src/test.ts",
+            "tsConfig": "projects/ng1-template-updater/tsconfig.spec.json",
+            "karmaConfig": "projects/ng1-template-updater/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ng1-template-updater/tsconfig.lib.json",
+              "projects/ng1-template-updater/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         }
       }
     }
   },
-  "defaultProject": "ng1-template-updater"
+  "defaultProject": "ng1-template-updater-web"
 }

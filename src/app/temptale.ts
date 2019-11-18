@@ -1,7 +1,4 @@
 export const TEMPLATE = `
-<div ng-app="movieHunter"></div>
-<div ng-controller="MovieListCtrl as vm"></div>
-
 <div ng-class="{active: isActive}"></div>
 <div ng-class="{active: isActive,
                 shazam: isImportant}"></div>
@@ -20,7 +17,6 @@ export const TEMPLATE = `
 <button ng-click="toggleImage($event)"></button>
 <button ng-foucs="fun($event)"></button>
 
-<div>{{(value | filter | orderBy: fun)}}</div>
 <div>{{value | limitTo:2:0}}</div>
 <div>{{value | currency}}</div>
 <div>{{value | currency: '$USD': 2}}</div>
@@ -41,12 +37,6 @@ export const TEMPLATE = `
     <td>{{movie.title}}</td>
   </tr>
   <tr ng-repeat="movie in movieList | limitTo:2:0"></tr>
-   <tr ng-repeat="item in items | filter : x | orderBy : order">
-    <td>{{movie.title}}</td>
-  </tr>
-  <tr ng-repeat="(key, value) in myObj"> ... </tr>
-  <tr ng-repeat="item in items track by item.id"> ... </tr>
-  <tr ng-repeat="item in items | filter:searchText as results track by item.id"> ... </tr>
 </table>
 
 <div ng-switch="favoriteHero &&

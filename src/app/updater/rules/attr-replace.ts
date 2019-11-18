@@ -1,9 +1,4 @@
-
-export interface AttrReplaceRule {
-  replace: string;
-  replaceWith: string;
-  url: string;
-}
+import {AttrReplaceRule} from '../interfaces';
 
 export const attrReplaceRules: AttrReplaceRule[] = [
   {

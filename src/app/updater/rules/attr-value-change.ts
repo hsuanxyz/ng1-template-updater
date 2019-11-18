@@ -3,14 +3,15 @@ import {Lexer} from '../utils/lexer';
 import {FilterParse} from '../utils/filter-parse';
 import {pipeChangeRules} from './pipe-change';
 import {pipeUnsupportedRules} from './pipe-unsupported';
-import {Failure} from '../interfaces/failure';
+import {Message} from '../interfaces/message';
 import {LogLevel} from '../interfaces/log-level';
+import {AttrValueChangeRules} from '../interfaces';
 
-export const valueChangeRules = {
+export const attrValueChangeRules: AttrValueChangeRules = {
   'ng-show': (expression: string, location?: Location) => {
-    const failures: Failure[] = [];
+    const messages: Message[] = [];
     const start = location.endOffset - 1 - expression.length;
-    failures.push({
+    messages.push({
       message: 'Update expression `ng-show="expression"` to `[hidden]="!(expression)"`',
       position: start,
       level: LogLevel.Info,
@@ -19,15 +20,15 @@ export const valueChangeRules = {
     });
     return {
       value: `!(${expression})`,
-      failures
+      messages
     };
   },
   'ng-repeat': (expression: string, location?: Location) => {
     const start = location.endOffset - 1 - expression.length;
-    const failures: Failure[] = [];
+    const messages: Message[] = [];
     let match = expression.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
     if (!match) {
-      failures.push({
+      messages.push({
         message: 'Unexpected expression',
         position: start,
         level: LogLevel.Error,
@@ -40,7 +41,7 @@ export const valueChangeRules = {
     const trackByExp = match[4];
     match = lhs.match(/^(?:(\s*[$\w]+)|\(\s*([$\w]+)\s*,\s*([$\w]+)\s*\))$/);
     if (!match) {
-      failures.push({
+      messages.push({
         message: 'Unexpected expression',
         position: start,
         level: LogLevel.Error,
@@ -51,7 +52,7 @@ export const valueChangeRules = {
     const keyIdentifier = match[2];
     if (aliasAs && (!/^[$a-zA-Z_][$a-zA-Z0-9_]*$/.test(aliasAs) ||
       /^(null|undefined|this|\$index|\$first|\$middle|\$last|\$even|\$odd|\$parent|\$root|\$id)$/.test(aliasAs))) {
-      failures.push({
+      messages.push({
         message: 'Unexpected expression',
         position: start,
         level: LogLevel.Error,
@@ -59,7 +60,7 @@ export const valueChangeRules = {
       });
     }
     if (trackByExp) {
-      failures.push({
+      messages.push({
         message: 'Unsupported expression `track by` use `trackBy` instead',
         position: start,
         level: LogLevel.Error,
@@ -68,7 +69,7 @@ export const valueChangeRules = {
       });
     }
     if (keyIdentifier) {
-      failures.push({
+      messages.push({
         message: 'Unsupported expression `(key, value) in items`',
         position: start,
         level: LogLevel.Error,
@@ -78,7 +79,7 @@ export const valueChangeRules = {
     }
 
     if (aliasAs) {
-      failures.push({
+      messages.push({
         message: 'Unsupported expression `item in items as named`',
         position: start,
         level: LogLevel.Error,
@@ -87,7 +88,7 @@ export const valueChangeRules = {
       });
     }
 
-    failures.push({
+    messages.push({
       message: 'Update expression `item in items` to `let item of items`',
       position: start,
       level: LogLevel.Info,
@@ -103,7 +104,7 @@ export const valueChangeRules = {
       if (fun) {
         const { value, url } = fun(filter);
         rhs = `${rhs.slice(0, filter[0].index)}${value}`;
-        failures.push({
+        messages.push({
           message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${value}`,
           position: start,
           level: LogLevel.Info,
@@ -114,7 +115,7 @@ export const valueChangeRules = {
 
       pipeUnsupportedRules.forEach(pipe => {
         if (filter[0].text === pipe) {
-          failures.push({
+          messages.push({
             message: `Unsupported filter(pipe) ${pipe}`,
             position: start,
             level: LogLevel.Error,
@@ -124,10 +125,10 @@ export const valueChangeRules = {
       });
     });
     return {
-      value: failures.every(f => f.level !== LogLevel.Error)
+      value: messages.every(f => f.level !== LogLevel.Error)
         ? `let ${valueIdentifier} of ${rhs}`
         : expression,
-      failures
+      messages
     };
   }
 };

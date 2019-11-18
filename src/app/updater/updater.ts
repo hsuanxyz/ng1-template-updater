@@ -11,29 +11,38 @@ import {StringUpdater} from './utils/update-recorder';
 import {computeLineStartsMap, getLineAndCharacterFromPosition} from '@angular/core/schematics/utils/line_mappings';
 import {Lexer} from './utils/lexer';
 import {FilterParse} from './utils/filter-parse';
-import {attrReplaceRules} from './rules/attr-replace';
-import {attrUnsupportedRules} from './rules/attr-unsupported';
-import {pipeChangeRules} from './rules/pipe-change';
-import {pipeUnsupportedRules} from './rules/pipe-unsupported';
-import {valueChangeRules} from './rules/value-change';
-import {Failure, FailureMessages} from './interfaces/failure';
-import {LogLevel} from './interfaces/log-level';
 
-export class TemplateAdapter {
+import {Message, MessageDetail, LogLevel, AttrReplaceRule, AttrValueChangeRules, PipeChangeRules, TemplateUpdaterRules} from './interfaces';
 
-  failures: Failure[] = [];
-  html: DefaultTreeDocument;
-  // rootNodes: html.Node[];
-  updateBuffer: StringUpdater;
+import {attrReplaceRules as defaultAttrReplaceRules} from './rules/attr-replace';
+import {attrUnsupportedRules as defaultAttrUnsupportedRules } from './rules/attr-unsupported';
+import {attrValueChangeRules as defaultAttrValueChangeRules} from './rules/attr-value-change';
+import {pipeChangeRules as defaultPipeChangeRules} from './rules/pipe-change';
+import {pipeUnsupportedRules as defaultPipeUnsupportedRules} from './rules/pipe-unsupported';
 
-  constructor(private originTemplate: string) {
-    this.html = parseFragment(originTemplate, { sourceCodeLocationInfo: true }) as DefaultTreeDocument;
-    this.updateBuffer = new StringUpdater(originTemplate);
+export const defaultTemplateUpdaterRules: TemplateUpdaterRules = {
+  attrReplaceRules: defaultAttrReplaceRules,
+  attrUnsupportedRules: defaultAttrUnsupportedRules,
+  pipeChangeRules: defaultPipeChangeRules,
+  pipeUnsupportedRules: defaultPipeUnsupportedRules,
+  attrValueChangeRules: defaultAttrValueChangeRules
+};
+
+export class TemplateUpdater {
+
+  private messages: Message[] = [];
+  private html: DefaultTreeDocument;
+  private updateBuffer: StringUpdater;
+  private originTemplate: string;
+  private template: string;
+
+  constructor(private rules: TemplateUpdaterRules = defaultTemplateUpdaterRules) {
+
   }
 
-  failureMessages(): FailureMessages[] {
+  getMessages(): MessageDetail[] {
     const lineMap = computeLineStartsMap(this.originTemplate);
-    return this.failures
+    return this.messages
       .sort((a, b) => a.level - b.level)
       .map(failure => {
         const pos = getLineAndCharacterFromPosition(lineMap, failure.position);
@@ -47,7 +56,24 @@ export class TemplateAdapter {
       });
   }
 
-  parse(): string {
+  getResult(): { template: string, originTemplate: string; messages: MessageDetail[] } {
+    return {
+      template: this.template,
+      messages: this.getMessages(),
+      originTemplate: this.originTemplate
+    };
+  }
+
+  parse(originTemplate: string) {
+    if (originTemplate === this.originTemplate) {
+      return this.getResult();
+    }
+
+    this.originTemplate = originTemplate;
+    this.messages = [];
+    this.html = parseFragment(originTemplate, { sourceCodeLocationInfo: true }) as DefaultTreeDocument;
+    this.updateBuffer = new StringUpdater(originTemplate);
+
     const visitNodes = nodes => {
       nodes.forEach(node => {
         if (node.childNodes) {
@@ -57,7 +83,9 @@ export class TemplateAdapter {
       });
     };
     visitNodes(this.html.childNodes);
-    return this.updateBuffer.toString();
+    this.template = this.updateBuffer.toString();
+
+    return this.getResult();
   }
 
   visitNode(node: DefaultTreeElement) {
@@ -73,22 +101,26 @@ export class TemplateAdapter {
 
   visitAttrs(attr: Attribute, location: Location) {
 
-    const changeRuleFun = valueChangeRules[attr.name];
-    const failures: Failure[] = [];
+    const attrValueChangeRules: AttrValueChangeRules = this.rules.attrValueChangeRules || {};
+    const attrReplaceRules: AttrReplaceRule[] = this.rules.attrReplaceRules || [];
+    const attrUnsupportedRules: string[] = this.rules.attrUnsupportedRules || [];
+
+    const changeRuleFun = attrValueChangeRules[attr.name];
+    const messages: Message[] = [];
     if (changeRuleFun) {
       const start = location.endOffset - 1 - attr.value.length;
       const data = changeRuleFun(attr.value, location);
       this.updateBuffer.remove(start, attr.value.length);
       this.updateBuffer.insertLeft(start, data.value);
-      failures.push(...data.failures);
+      messages.push(...data.messages);
     }
 
-    if (failures.filter(failure => failure.level === LogLevel.Error).length === 0) {
+    if (messages.filter(failure => failure.level === LogLevel.Error).length === 0) {
       attrReplaceRules.forEach(rule => {
         if (attr.name === rule.replace) {
           this.updateBuffer.remove(location.startOffset, attr.name.length);
           this.updateBuffer.insertLeft(location.startOffset, rule.replaceWith);
-          failures.push({
+          messages.push({
             message: `Update property ${attr.name} to ${rule.replaceWith}`,
             position: location.startOffset,
             level: LogLevel.Info,
@@ -100,7 +132,7 @@ export class TemplateAdapter {
 
       attrUnsupportedRules.forEach(rule => {
         if (attr.name === rule) {
-          failures.push({
+          messages.push({
             message: `Unsupported property ${rule}`,
             position: location.startOffset,
             level: LogLevel.Error,
@@ -110,10 +142,13 @@ export class TemplateAdapter {
       });
     }
 
-    this.failures.push(...failures);
+    this.messages.push(...messages);
   }
 
   visitTextNode(node: DefaultTreeChildNode) {
+    const pipeChangeRules: PipeChangeRules = this.rules.pipeChangeRules || {};
+    const pipeUnsupportedRules: string[] = this.rules.pipeUnsupportedRules || [];
+
     const location = (node as DefaultTreeElement).sourceCodeLocation;
     const textNode = node as DefaultTreeTextNode;
     if (!textNode.value.trim()) {
@@ -131,7 +166,7 @@ export class TemplateAdapter {
         if (value !== filter.map(f => f.text).join(':')) {
           this.updateBuffer.remove(start, length);
           this.updateBuffer.insertLeft(start, value);
-          this.failures.push({
+          this.messages.push({
             message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${value}`,
             position: start,
             level: LogLevel.Info,
@@ -141,9 +176,9 @@ export class TemplateAdapter {
         }
       }
 
-      pipeUnsupportedRules.filter(pipe => {
+      pipeUnsupportedRules.forEach(pipe => {
         if (filter[0].text === pipe) {
-          this.failures.push({
+          this.messages.push({
             message: `Unsupported filter(pipe) ${pipe}`,
             position: start,
             level: LogLevel.Error,

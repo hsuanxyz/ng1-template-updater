@@ -23,7 +23,7 @@
         <div class="messages">
           <div class="message"
                (click)="scrollToLine(item)"
-               *ngFor="let item of failures">
+               *ngFor="let item of messageDetails">
             <i *ngIf="item.level === 0" nz-icon class="error" nzType="stop" nzTheme="outline"></i>
             <i *ngIf="item.level === 2" nz-icon class="close" nzType="issues-close" nzTheme="outline"></i>
             <span class="position"> ({{(item.pos.line + 1) + ',' + (item.pos.character + 1)}})</span>

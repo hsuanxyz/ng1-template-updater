@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {editor, Range} from 'monaco-editor';
-import {FailureMessages, LogLevel, TemplateAdapter} from './updater';
+import {MessageDetail, LogLevel, TemplateUpdater} from './updater';
 import {TEMPLATE} from './temptale';
 import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
 
@@ -14,11 +14,16 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('container', { static: false }) container: ElementRef<HTMLDivElement>;
 
   timeoutId = -1;
-  failures: FailureMessages[] = [];
+  messageDetails: MessageDetail[] = [];
+  templateUpdater: TemplateUpdater;
   editor: IStandaloneCodeEditor;
   value = TEMPLATE;
   canFix = false;
   decorations: string[] = [];
+
+  constructor() {
+    this.templateUpdater = new TemplateUpdater();
+  }
 
   ngAfterViewInit(): void {
     this.editor = editor.create(this.container.nativeElement, {
@@ -39,7 +44,7 @@ export class AppComponent implements AfterViewInit {
     this.editor.setValue(this.value);
   }
 
-  scrollToLine(failure: FailureMessages) {
+  scrollToLine(failure: MessageDetail) {
     const range = new Range(
       failure.pos.line + 1, failure.pos.character + 1,
       failure.pos.line + 1, failure.pos.character + failure.length + 1
@@ -51,19 +56,16 @@ export class AppComponent implements AfterViewInit {
 
   fix() {
     const code = this.editor.getValue();
-    const templateAdapter = new TemplateAdapter(code);
-    const newCode = templateAdapter.parse();
-    this.editor.setValue(newCode);
+    const { template } = this.templateUpdater.parse(code);
+    this.editor.setValue(template);
   }
 
   check() {
     const code = this.editor.getValue();
-    const templateAdapter = new TemplateAdapter(code);
-    templateAdapter.parse();
-    const failures = templateAdapter.failureMessages();
-    this.failures = [...failures];
-    this.canFix = failures.some(f => f.level === LogLevel.Info);
-    this.decorations = this.editor.deltaDecorations(this.decorations, failures.map(failure => {
+    const { messages } = this.templateUpdater.parse(code);
+    this.messageDetails = [...messages];
+    this.canFix = messages.some(f => f.level === LogLevel.Info);
+    this.decorations = this.editor.deltaDecorations(this.decorations, messages.map(failure => {
       return {
         range: new Range(
           failure.pos.line + 1, failure.pos.character + 1,

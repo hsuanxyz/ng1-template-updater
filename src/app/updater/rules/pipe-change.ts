@@ -1,10 +1,9 @@
 import {Token} from '../utils/lexer';
 import {CURRENCIES_EN} from '../utils/currencies';
 import {strToNumber} from '../utils/str2number';
+import {PipeChangeRules} from '../interfaces';
 
-export type PipeChangeRule = (pipes: Token[]) => { value: string,  url: string};
-
-export const pipeChangeRules: { [key: string]: PipeChangeRule } = {
+export const pipeChangeRules: PipeChangeRules = {
   limitTo: (pipes: Token[]) => {
     let value = '';
     const url = 'https://angular.io/api/common/SlicePipe';

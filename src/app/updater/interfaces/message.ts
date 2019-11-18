@@ -1,7 +1,7 @@
 // import * as html from "@angular/compiler/src/ml_parser/ast";
 import {LogLevel} from './log-level';
 
-export interface Failure {
+export interface Message {
   position: number;
   message: string;
   length: number;
@@ -9,7 +9,7 @@ export interface Failure {
   level: LogLevel;
 }
 
-export interface FailureMessages {
+export interface MessageDetail {
   message: string;
   pos: {character: number; line: number};
   length: number;

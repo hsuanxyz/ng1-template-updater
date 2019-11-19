@@ -3,12 +3,11 @@ import {Lexer} from '../utils/lexer';
 import {FilterParse} from '../utils/filter-parse';
 import {pipeChangeRules} from './pipe-change';
 import {pipeUnsupportedRules} from './pipe-unsupported';
-import {AttrValueChangeRules, Message, LogLevel} from '../interfaces';
+import {ValueChangeRules, Message, LogLevel} from '../interfaces';
 
-export const attrValueChangeRules: AttrValueChangeRules = {
-  'ng-show': (expression: string, location?: Location) => {
+export const attrValueChangeRules: ValueChangeRules = {
+  'ng-show': (expression: string, start: number) => {
     const messages: Message[] = [];
-    const start = location.endOffset - 1 - expression.length;
     messages.push({
       message: 'Update expression `ng-show="expression"` to `[hidden]="!(expression)"`',
       position: start,
@@ -21,8 +20,7 @@ export const attrValueChangeRules: AttrValueChangeRules = {
       messages
     };
   },
-  'ng-repeat': (expression: string, location?: Location) => {
-    const start = location.endOffset - 1 - expression.length;
+  'ng-repeat': (expression: string, start: number) => {
     const messages: Message[] = [];
     let match = expression.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/);
     if (!match) {

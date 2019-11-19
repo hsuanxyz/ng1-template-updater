@@ -12,14 +12,24 @@ import {computeLineStartsMap, getLineAndCharacterFromPosition} from '@angular/co
 import {Lexer} from './utils/lexer';
 import {FilterParse} from './utils/filter-parse';
 
-import {Message, MessageDetail, LogLevel, AttrReplaceRule, AttrValueChangeRules, PipeChangeRules, TemplateUpdaterRules} from './interfaces';
+import {
+  Message,
+  MessageDetail,
+  LogLevel,
+  AttrReplaceRule,
+  ValueChangeRules,
+  PipeChangeRules,
+  TemplateUpdaterRules,
+  ValueChangeRule
+} from './interfaces';
 
 import {
   attrReplaceRules as defaultAttrReplaceRules,
   attrUnsupportedRules as defaultAttrUnsupportedRules,
   attrValueChangeRules as defaultAttrValueChangeRules,
   pipeChangeRules as defaultPipeChangeRules,
-  pipeUnsupportedRules as defaultPipeUnsupportedRules
+  pipeUnsupportedRules as defaultPipeUnsupportedRules,
+  valueChangeRules as defaultValueChangeRules
 } from './rules';
 
 export const defaultTemplateUpdaterRules: TemplateUpdaterRules = {
@@ -27,7 +37,8 @@ export const defaultTemplateUpdaterRules: TemplateUpdaterRules = {
   attrUnsupportedRules: defaultAttrUnsupportedRules,
   pipeChangeRules: defaultPipeChangeRules,
   pipeUnsupportedRules: defaultPipeUnsupportedRules,
-  attrValueChangeRules: defaultAttrValueChangeRules
+  attrValueChangeRules: defaultAttrValueChangeRules,
+  valueChangeRules: defaultValueChangeRules
 };
 
 export class TemplateUpdater {
@@ -103,21 +114,42 @@ export class TemplateUpdater {
 
   visitAttrs(attr: Attribute, location: Location) {
 
-    const attrValueChangeRules: AttrValueChangeRules = this.rules.attrValueChangeRules || {};
+    const attrValueChangeRules: ValueChangeRules = this.rules.attrValueChangeRules || {};
     const attrReplaceRules: AttrReplaceRule[] = this.rules.attrReplaceRules || [];
     const attrUnsupportedRules: string[] = this.rules.attrUnsupportedRules || [];
+    const valueChangeRules: ValueChangeRule[] = this.rules.valueChangeRules || [];
 
+    const start = location.endOffset - 1 - attr.value.length;
     const changeRuleFun = attrValueChangeRules[attr.name];
     const messages: Message[] = [];
+    let value = attr.value;
     if (changeRuleFun) {
-      const start = location.endOffset - 1 - attr.value.length;
-      const data = changeRuleFun(attr.value, location);
-      this.updateBuffer.remove(start, attr.value.length);
-      this.updateBuffer.insertLeft(start, data.value);
+      const data = changeRuleFun(attr.value, start);
+      if (data.value !== value) {
+        value = data.value;
+      }
       messages.push(...data.messages);
     }
 
-    if (messages.filter(failure => failure.level === LogLevel.Error).length === 0) {
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < valueChangeRules.length; i++) {
+      if (value !== attr.value) {
+        break;
+      }
+      const valueChangeRule = valueChangeRules[i];
+      const data = valueChangeRule(value, start);
+      if (data.value !== value) {
+        value = data.value;
+      }
+      messages.push(...data.messages);
+    }
+
+    if (value !== attr.value) {
+      this.updateBuffer.remove(start, attr.value.length);
+      this.updateBuffer.insertLeft(start, value);
+    }
+
+    if (!messages.some(failure => failure.level === LogLevel.Error)) {
       attrReplaceRules.forEach(rule => {
         if (attr.name === rule.replace) {
           this.updateBuffer.remove(location.startOffset, attr.name.length);
@@ -150,13 +182,17 @@ export class TemplateUpdater {
   visitTextNode(node: DefaultTreeChildNode) {
     const pipeChangeRules: PipeChangeRules = this.rules.pipeChangeRules || {};
     const pipeUnsupportedRules: string[] = this.rules.pipeUnsupportedRules || [];
+    const valueChangeRules: ValueChangeRule[] = this.rules.valueChangeRules || [];
 
+    const messages: Message[] = [];
     const location = (node as DefaultTreeElement).sourceCodeLocation;
     const textNode = node as DefaultTreeTextNode;
+    let textValue = textNode.value;
     if (!textNode.value.trim()) {
       return;
     }
-    const lex = new Lexer(textNode.value).lex();
+
+    const lex = new Lexer(textValue).lex();
     const filterParse = new FilterParse([...lex]);
     const filters = filterParse.pares();
     filters.filter(f => f.length).forEach(filter => {
@@ -168,7 +204,7 @@ export class TemplateUpdater {
         if (value !== filter.map(f => f.text).join(':')) {
           this.updateBuffer.remove(start, length);
           this.updateBuffer.insertLeft(start, value);
-          this.messages.push({
+          messages.push({
             message: `Update filter ${filter.map(f => f.text).join(':')} to pipe ${value}`,
             position: start,
             level: LogLevel.Info,
@@ -180,7 +216,7 @@ export class TemplateUpdater {
 
       pipeUnsupportedRules.forEach(pipe => {
         if (filter[0].text === pipe) {
-          this.messages.push({
+          messages.push({
             message: `Unsupported filter(pipe) ${pipe}`,
             position: start,
             level: LogLevel.Error,
@@ -190,5 +226,24 @@ export class TemplateUpdater {
       });
     });
 
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < valueChangeRules.length; i++) {
+      if (textValue !== textNode.value) {
+        break;
+      }
+      const valueChangeRule = valueChangeRules[i];
+      const data = valueChangeRule(textValue, location.startOffset);
+      if (data.value !== textValue) {
+        textValue = data.value;
+      }
+      messages.push(...data.messages);
+    }
+
+    if (textValue !== textNode.value) {
+      this.updateBuffer.remove(location.startOffset, textValue.length);
+      this.updateBuffer.insertLeft(location.startOffset, textValue);
+    }
+
+    this.messages.push(...messages);
   }
 }

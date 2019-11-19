@@ -8,9 +8,9 @@ export const TEMPLATE = `
 <a ng-href="#{{ moviesHash }}">Movies</a>
 
 <h3 ng-show="vm.favoriteHero">
+  {{vm.value}}
   Your favorite hero is: {{vm.favoriteHero}}
 </h3>
-
 
 <input ng-model="value"/>
 <button ng-click="toggleImage()" nzClass></button>

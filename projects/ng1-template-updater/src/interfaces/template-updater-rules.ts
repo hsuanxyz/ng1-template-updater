@@ -1,9 +1,10 @@
-import {Location} from 'parse5';
 import {Message} from './message';
 import {Token} from '../utils/lexer';
 
-export interface AttrValueChangeRules {
-  [key: string]: (expression: string, location?: Location) => { value: string; messages: Message[] };
+export type ValueChangeRule = (expression: string, start?: number) => { value: string; messages: Message[] };
+
+export interface ValueChangeRules {
+  [key: string]: ValueChangeRule;
 }
 
 export interface AttrReplaceRule {
@@ -20,9 +21,10 @@ export interface PipeChangeRules {
 
 export interface TemplateUpdaterRules {
   attrReplaceRules?: AttrReplaceRule[];
-  attrValueChangeRules?: AttrValueChangeRules;
+  attrValueChangeRules?: ValueChangeRules;
   attrUnsupportedRules?: string[];
   pipeChangeRules?: PipeChangeRules;
   pipeUnsupportedRules?: string[];
+  valueChangeRules?: ValueChangeRule[];
 }
 

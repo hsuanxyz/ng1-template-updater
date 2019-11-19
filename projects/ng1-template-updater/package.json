@@ -1,8 +1,12 @@
 {
   "name": "ng1-template-updater",
   "version": "0.0.1",
+  "author": "Hsuan Lee",
+  "license": "MIT",
+  "homepage": "https://github.com/hsuanxyz/ng1-template-updater",
   "peerDependencies": {
     "@angular/common": "^8.0.0",
-    "@angular/core": "^8.0.0"
+    "@angular/core": "^8.0.0",
+    "parse5": "^5.1.1"
   }
 }

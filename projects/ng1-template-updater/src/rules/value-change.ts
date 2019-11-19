@@ -3,8 +3,9 @@ import {LogLevel, Message, ValueChangeRule} from '../interfaces';
 const viewModelRule: ValueChangeRule = (expression: string, start?: number) => {
   const regexp = /(vm\.)/g;
   const messages: Message[] = [];
-  const matchArrays = [...expression.matchAll(regexp)];
-  matchArrays.forEach(match => {
+
+  let match = regexp.exec(expression);
+  while (match !== null) {
     messages.push({
       position: start + match.index,
       message: 'No longer needed to use the `vm` alias to access controller in Angular',
@@ -12,7 +13,9 @@ const viewModelRule: ValueChangeRule = (expression: string, start?: number) => {
       url: 'https://angular.io/guide/ajs-quick-reference',
       level: LogLevel.Info
     });
-  });
+    match = regexp.exec(expression);
+  }
+
   return {
     value: expression.replace(regexp, ''),
     messages

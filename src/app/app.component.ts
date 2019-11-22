@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
 import {editor, Range} from 'monaco-editor';
 import {MessageDetail, LogLevel, TemplateUpdater} from 'ng1-template-updater';
 import {TEMPLATE} from './temptale';
@@ -11,7 +11,7 @@ import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
 })
 export class AppComponent implements AfterViewInit {
 
-  @ViewChild('container', { static: false }) container: ElementRef<HTMLDivElement>;
+  @ViewChild('container') container: ElementRef<HTMLDivElement>;
 
   timeoutId = -1;
   messageDetails: MessageDetail[] = [];
@@ -58,6 +58,14 @@ export class AppComponent implements AfterViewInit {
     const code = this.editor.getValue();
     const { template } = this.templateUpdater.parse(code);
     this.editor.setValue(template);
+    if ((window as any).ga) {
+      (window as any).ga('send', 'event', {
+        eventCategory: 'UpdateTemplate',
+        eventLabel: 'QuickFix',
+        eventAction: 'click',
+        value: null
+      });
+    }
   }
 
   check() {

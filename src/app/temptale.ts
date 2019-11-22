@@ -47,4 +47,10 @@ export const TEMPLATE = `
     <div ng-switch-when="false">
       No movie, sorry!
     </div>
-</div>`;
+</div>
+
+<input></input>
+<img></img>
+<hr></hr>
+<br></br>
+`;

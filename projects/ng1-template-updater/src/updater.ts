@@ -31,6 +31,7 @@ import {
   pipeUnsupportedRules as defaultPipeUnsupportedRules,
   valueChangeRules as defaultValueChangeRules
 } from './rules';
+import {fixVoidElement} from 'ng1-template-updater/utils/void-element';
 
 export const defaultTemplateUpdaterRules: TemplateUpdaterRules = {
   attrReplaceRules: defaultAttrReplaceRules,
@@ -96,7 +97,7 @@ export class TemplateUpdater {
       });
     };
     visitNodes(this.html.childNodes);
-    this.template = this.updateBuffer.toString();
+    this.template = fixVoidElement(this.updateBuffer.toString());
 
     return this.getResult();
   }

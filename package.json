@@ -7,7 +7,7 @@
     "postinstall": "npm run build:lib",
     "ng": "ng",
     "start": "ng serve --extra-webpack-config webpack.partial.js",
-    "build": "ng build --extra-webpack-config webpack.partial.js",
+    "build": "node --max_old_space_size=4096 node_modules/@angular/cli/bin/ng build --extra-webpack-config webpack.partial.js",
     "build:lib": "ng build ng1-template-updater",
     "test": "ng test",
     "lint": "ng lint",

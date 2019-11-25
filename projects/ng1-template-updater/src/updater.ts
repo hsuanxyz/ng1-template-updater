@@ -111,6 +111,7 @@ export class TemplateUpdater {
     if (node && node.nodeName === '#text') {
       this.visitTextNode(node as DefaultTreeChildNode);
     }
+    this.fixNgModelName(node);
   }
 
   visitAttrs(attr: Attribute, location: Location) {
@@ -246,5 +247,22 @@ export class TemplateUpdater {
     }
 
     this.messages.push(...messages);
+  }
+
+  private fixNgModelName(node: DefaultTreeElement) {
+    if (node.attrs) {
+      const isModel = node.attrs.find(attr => attr.name === 'ng-model');
+      if (isModel) {
+        const hasName = node.attrs.find(attr => attr.name === 'name');
+        if (!hasName) {
+          const start = node.sourceCodeLocation.startOffset + node.tagName.length + 1;
+          const id = node.attrs.find(attr => attr.name === 'id');
+          this.updateBuffer.insertRight(
+            start,
+            ` name="${ id ? id.value : 'modelName' + String(start)}"`
+          );
+        }
+      }
+    }
   }
 }

@@ -1,3 +1,4 @@
+import {computeLineStartsMap, getLineAndCharacterFromPosition} from '@angular/core/schematics/utils/line_mappings';
 import {
   Attribute,
   DefaultTreeChildNode,
@@ -8,9 +9,9 @@ import {
   parseFragment
 } from 'parse5';
 import {StringUpdater} from './utils/update-recorder';
-import {computeLineStartsMap, getLineAndCharacterFromPosition} from '@angular/core/schematics/utils/line_mappings';
 import {Lexer} from './utils/lexer';
 import {FilterParse} from './utils/filter-parse';
+import {fixVoidElement} from './utils/void-element';
 
 import {
   Message,
@@ -31,7 +32,6 @@ import {
   pipeUnsupportedRules as defaultPipeUnsupportedRules,
   valueChangeRules as defaultValueChangeRules
 } from './rules';
-import {fixVoidElement} from 'ng1-template-updater/utils/void-element';
 
 export const defaultTemplateUpdaterRules: TemplateUpdaterRules = {
   attrReplaceRules: defaultAttrReplaceRules,
